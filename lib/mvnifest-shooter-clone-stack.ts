@@ -4,6 +4,7 @@ import {
   AccountRecovery,
   UserPool,
   UserPoolClient,
+  UserPoolOperation,
   VerificationEmailStyle,
 } from "aws-cdk-lib/aws-cognito";
 import { Code, Function, LayerVersion, Runtime } from "aws-cdk-lib/aws-lambda";
@@ -103,6 +104,30 @@ export class MvnifestShooterCloneStack extends Stack {
         ),
       ],
     });
+
+    // User Post Confirmation Trigger - Cognito Post Confirmation Trigger implementation
+    const MvnifestShooterUserCognitoTriggerPostConfirmation = new Function(
+      this,
+      `mvnifest-shooter-user-cognito-trigger-post-confirmation-${NODE_ENV}`,
+      {
+        runtime: Runtime.NODEJS_14_X,
+        code: Code.fromAsset(
+          path.join(__dirname, "../functions/postConfirmation")
+        ),
+        handler: "index.handler",
+        environment: {
+          NODE_ENV,
+        },
+        layers: [generalLayer],
+      }
+    );
+    MvnifestShooterUserCognitoTriggerPostConfirmation.addToRolePolicy(
+      ssmIAMPolicy
+    );
+    userPool.addTrigger(
+      UserPoolOperation.POST_CONFIRMATION,
+      MvnifestShooterUserCognitoTriggerPostConfirmation
+    );
 
     // User handler - AppSync DataSource implementation
     const MvnifestShooterUsersHandler = new Function(
