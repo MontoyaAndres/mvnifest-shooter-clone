@@ -181,6 +181,18 @@ export class MvnifestShooterCloneStack extends Stack {
       requestMappingTemplate: MappingTemplate.lambdaRequest(),
       responseMappingTemplate: MappingTemplate.lambdaResult(),
     });
+    shooterSectionFunctionDS.createResolver({
+      typeName: "Section",
+      fieldName: "user",
+      requestMappingTemplate: MappingTemplate.lambdaRequest(),
+      responseMappingTemplate: MappingTemplate.lambdaResult(),
+    });
+    shooterSectionFunctionDS.createResolver({
+      typeName: "Section",
+      fieldName: "publications",
+      requestMappingTemplate: MappingTemplate.lambdaRequest(),
+      responseMappingTemplate: MappingTemplate.lambdaResult(),
+    });
 
     // Publication handler - AppSync DataSource implementation
     const MvnifestShooterPublicationsHandler = new Function(

@@ -6,6 +6,8 @@ const {
   createSectionOperation,
   updateSectionOperation,
   deleteSectionOperation,
+  getUserOnSection,
+  listPublicationsOnSection,
 } = require("./utils/operations");
 
 const { initNeo4j } = require("/opt/nodejs/connection");
@@ -98,6 +100,30 @@ exports.handler = middy(async (event, context) => {
           await deleteSectionOperation(input, sub, session);
 
           return true;
+        } catch (error) {
+          throw new Error(error);
+        }
+      },
+    },
+    Section: {
+      user: async (ctx, session) => {
+        const { source } = ctx;
+
+        try {
+          const user = await getUserOnSection(source, session);
+
+          return user;
+        } catch (error) {
+          throw new Error(error);
+        }
+      },
+      publications: async (ctx, session) => {
+        const { source } = ctx;
+
+        try {
+          const publications = await listPublicationsOnSection(source, session);
+
+          return publications;
         } catch (error) {
           throw new Error(error);
         }

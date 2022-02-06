@@ -1,7 +1,6 @@
 type User {
   id: ID!
   email: String!
-  sections: [Section!]!
 }
 
 type Section {
@@ -36,8 +35,8 @@ type Query {
   getUser(id: ID): User
   getSection(id: ID!): Section
   listSections: [Section!]!
-  getPublication(id: ID!): Publication
-  listPublications: [Publication!]!
+  getPublication(id: ID!, sectionId: ID!): Publication
+  listPublications(sectionId: ID!): [Publication!]!
 }
 
 type Mutation {
@@ -69,7 +68,7 @@ input CreatePublicationInput {
   tags: [String]
   description: String!
   image: String!
-  metadata: PublicationMetadataInput
+  metadata: PublicationMetadataInput!
   isCompleted: Boolean
 }
 
@@ -87,6 +86,7 @@ input UpdatePublicationInput {
 
 input DeletePublicationInput {
   id: ID!
+  sectionId: ID!
 }
 
 input PublicationMetadataInput {

@@ -30,20 +30,20 @@ const listSectionsOperation = async (subId, session) => {
       MATCH (user:USER) - [:OWNS] -> (sections:SECTION)
       WHERE user.subId = $subId
       RETURN sections
-      ORDER BY sections.createdAt
+      ORDER BY sections.createdAt DESC
       `,
       { subId }
     );
 
-    // TODO: FIX THIS
-
     const records =
-      result.records
-        .map((record) => record.get(0))
-        .map((record) => ({ ...record.properties, id: record.identity.low })) ||
-      [];
+      result.records.map((record) => {
+        let currentRecord = record.get(0);
 
-    console.log(records);
+        return {
+          ...currentRecord.properties,
+          id: currentRecord.identity.low,
+        };
+      }) || [];
 
     return records;
   } catch (error) {
@@ -130,10 +130,68 @@ const deleteSectionOperation = async (input, subId, session) => {
   }
 };
 
+const getUserOnSection = async (source, session) => {
+  try {
+    const result = await session.run(
+      `
+      MATCH (user:USER) - [:OWNS] -> (section:SECTION)
+      WHERE ID(section) = $sectionId
+      RETURN user
+      `,
+      {
+        sectionId: parseInt(source.id),
+      }
+    );
+
+    const record = result.records[0];
+    const node = record.get(0);
+
+    return {
+      ...node.properties,
+      id: node.identity.low,
+    };
+  } catch (error) {
+    throw new Error(error);
+  }
+};
+
+const listPublicationsOnSection = async (source, session) => {
+  try {
+    const result = await session.run(
+      `
+      MATCH (section:SECTION) - [:CREATED] -> (publications:PUBLICATION)
+      WHERE ID(section) = $sectionId
+      RETURN publications
+      ORDER BY publications.createdAt DESC
+      `,
+      {
+        sectionId: parseInt(source.id),
+      }
+    );
+
+    const records =
+      result.records.map((record) => {
+        let currentRecord = record.get(0);
+
+        return {
+          ...currentRecord.properties,
+          id: currentRecord.identity.low,
+          metadata: JSON.parse(currentRecord.properties.metadata),
+        };
+      }) || [];
+
+    return records;
+  } catch (error) {
+    throw new Error(error);
+  }
+};
+
 module.exports = {
   getSectionOperation,
   listSectionsOperation,
   createSectionOperation,
   updateSectionOperation,
   deleteSectionOperation,
+  getUserOnSection,
+  listPublicationsOnSection,
 };
