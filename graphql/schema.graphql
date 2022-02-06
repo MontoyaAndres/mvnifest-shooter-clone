@@ -1,0 +1,101 @@
+type User {
+  id: ID!
+  email: String!
+  sections: [Section!]!
+}
+
+type Section {
+  id: ID!
+  name: String!
+  createdAt: AWSDateTime!
+  updatedAt: AWSDateTime!
+  user: User!
+  publications: [Publication!]!
+}
+
+type Publication {
+  id: ID!
+  title: String!
+  subtitle: String
+  tags: [String]
+  description: String!
+  image: String!
+  metadata: Metadata
+  isCompleted: Boolean!
+  createdAt: AWSDateTime!
+  updatedAt: AWSDateTime!
+}
+
+type Metadata {
+  title: String
+  description: String
+  keywords: [String]
+}
+
+type Query {
+  getUser(id: ID): User
+  getSection(id: ID!): Section
+  listSections: [Section!]!
+  getPublication(id: ID!): Publication
+  listPublications: [Publication!]!
+}
+
+type Mutation {
+  createSection(input: CreateSectionInput!): Boolean!
+  updateSection(input: UpdateSectionInput!): Boolean!
+  deleteSection(input: DeleteSectionInput!): Boolean!
+  createPublication(input: CreatePublicationInput!): Boolean!
+  updatePublication(input: UpdatePublicationInput!): Boolean!
+  deletePublication(input: DeletePublicationInput!): Boolean!
+}
+
+input CreateSectionInput {
+  name: String!
+}
+
+input UpdateSectionInput {
+  id: ID!
+  name: String!
+}
+
+input DeleteSectionInput {
+  id: ID!
+}
+
+input CreatePublicationInput {
+  sectionId: ID!
+  title: String!
+  subtitle: String
+  tags: [String]
+  description: String!
+  image: String!
+  metadata: PublicationMetadataInput
+  isCompleted: Boolean
+}
+
+input UpdatePublicationInput {
+  id: ID!
+  sectionId: ID!
+  title: String
+  subtitle: String
+  tags: [String]
+  description: String
+  image: String
+  metadata: PublicationMetadataInput
+  isCompleted: Boolean
+}
+
+input DeletePublicationInput {
+  id: ID!
+}
+
+input PublicationMetadataInput {
+  title: String
+  description: String
+  keywords: [String]
+}
+
+schema {
+  query: Query
+  mutation: Mutation
+}
