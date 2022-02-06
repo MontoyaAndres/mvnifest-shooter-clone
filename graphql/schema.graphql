@@ -10,6 +10,7 @@ type Section {
   updatedAt: AWSDateTime!
   user: User!
   publications: [Publication!]!
+  events: [Event!]!
 }
 
 type Publication {
@@ -31,12 +32,27 @@ type Metadata {
   keywords: [String]
 }
 
+type Event {
+  id: ID!
+  dateStart: AWSDateTime!
+  dateEnd: AWSDateTime!
+  name: String!
+  description: String!
+  image: String!
+  ticketsAvailable: Int!
+  location: String!
+  createdAt: AWSDateTime!
+  updatedAt: AWSDateTime!
+}
+
 type Query {
   getUser(id: ID): User
   getSection(id: ID!): Section
   listSections: [Section!]!
   getPublication(id: ID!, sectionId: ID!): Publication
   listPublications(sectionId: ID!): [Publication!]!
+  getEvent(id: ID!, sectionId: ID!): Event
+  listEvents(sectionId: ID!): [Event!]!
 }
 
 type Mutation {
@@ -46,6 +62,9 @@ type Mutation {
   createPublication(input: CreatePublicationInput!): Boolean!
   updatePublication(input: UpdatePublicationInput!): Boolean!
   deletePublication(input: DeletePublicationInput!): Boolean!
+  createEvent(input: CreateEventInput!): Boolean!
+  updateEvent(input: UpdateEventInput!): Boolean!
+  deleteEvent(input: DeleteEventInput!): Boolean!
 }
 
 input CreateSectionInput {
@@ -93,6 +112,34 @@ input PublicationMetadataInput {
   title: String
   description: String
   keywords: [String]
+}
+
+input CreateEventInput {
+  sectionId: ID!
+  dateStart: AWSDateTime!
+  dateEnd: AWSDateTime!
+  name: String!
+  description: String!
+  image: String!
+  ticketsAvailable: Int!
+  location: String!
+}
+
+input UpdateEventInput {
+  id: ID!
+  sectionId: ID!
+  dateStart: AWSDateTime
+  dateEnd: AWSDateTime
+  name: String
+  description: String
+  image: String
+  ticketsAvailable: Int
+  location: String
+}
+
+input DeleteEventInput {
+  id: ID!
+  sectionId: ID!
 }
 
 schema {

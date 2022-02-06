@@ -270,6 +270,57 @@ export class MvnifestShooterCloneStack extends Stack {
       responseMappingTemplate: MappingTemplate.lambdaResult(),
     });
 
+    // Event handler - AppSync DataSource implementation
+    const MvnifestShooterEventsHandler = new Function(
+      this,
+      `mvnifest-shooter-events-handler-${NODE_ENV}`,
+      {
+        runtime: Runtime.NODEJS_14_X,
+        code: Code.fromAsset(path.join(__dirname, "../functions/events")),
+        handler: "index.handler",
+        environment: {
+          NODE_ENV,
+        },
+        layers: [generalLayer],
+      }
+    );
+    MvnifestShooterEventsHandler.addToRolePolicy(ssmIAMPolicy);
+
+    const shooterEventFunctionDS = api.addLambdaDataSource(
+      "ShooterEventFunctionDataSource",
+      MvnifestShooterEventsHandler
+    );
+    shooterEventFunctionDS.createResolver({
+      typeName: "Query",
+      fieldName: "getEvent",
+      requestMappingTemplate: MappingTemplate.lambdaRequest(),
+      responseMappingTemplate: MappingTemplate.lambdaResult(),
+    });
+    shooterEventFunctionDS.createResolver({
+      typeName: "Query",
+      fieldName: "listEvents",
+      requestMappingTemplate: MappingTemplate.lambdaRequest(),
+      responseMappingTemplate: MappingTemplate.lambdaResult(),
+    });
+    shooterEventFunctionDS.createResolver({
+      typeName: "Mutation",
+      fieldName: "createEvent",
+      requestMappingTemplate: MappingTemplate.lambdaRequest(),
+      responseMappingTemplate: MappingTemplate.lambdaResult(),
+    });
+    shooterEventFunctionDS.createResolver({
+      typeName: "Mutation",
+      fieldName: "updateEvent",
+      requestMappingTemplate: MappingTemplate.lambdaRequest(),
+      responseMappingTemplate: MappingTemplate.lambdaResult(),
+    });
+    shooterEventFunctionDS.createResolver({
+      typeName: "Mutation",
+      fieldName: "deleteEvent",
+      requestMappingTemplate: MappingTemplate.lambdaRequest(),
+      responseMappingTemplate: MappingTemplate.lambdaResult(),
+    });
+
     new CfnOutput(this, "UserPoolId", {
       value: userPool.userPoolId,
     });
