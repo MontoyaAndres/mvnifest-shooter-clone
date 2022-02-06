@@ -102,7 +102,7 @@ const deleteSectionOperation = async (input, subId, session) => {
     const listPublicationsFromSection = await session.run(
       `
       MATCH (user:USER)
-      MATCH (section:SECTION) - [:CREATED] -> (publications:PUBLICATION)
+      MATCH (section:SECTION) - [:CREATES_PUBLICATION] -> (publications:PUBLICATION)
       WHERE user.subId = $subId AND ID(section) = $sectionId
       RETURN publications
       `,
@@ -159,7 +159,7 @@ const listPublicationsOnSection = async (source, session) => {
   try {
     const result = await session.run(
       `
-      MATCH (section:SECTION) - [:CREATED] -> (publications:PUBLICATION)
+      MATCH (section:SECTION) - [:CREATES_PUBLICATION] -> (publications:PUBLICATION)
       WHERE ID(section) = $sectionId
       RETURN publications
       ORDER BY publications.createdAt DESC

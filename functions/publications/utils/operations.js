@@ -4,7 +4,7 @@ const getPublicationOperation = async (id, sectionId, subId, session) => {
   try {
     const result = await session.run(
       `
-      MATCH (user:USER) - [:OWNS] -> (section:SECTION) - [:CREATED] -> (publication:PUBLICATION)
+      MATCH (user:USER) - [:OWNS] -> (section:SECTION) - [:CREATES_PUBLICATION] -> (publication:PUBLICATION)
       WHERE user.subId = $subId AND ID(section) = $sectionId AND ID(publication) = $publicationId
       RETURN publication
       `,
@@ -32,7 +32,7 @@ const listPublicationsOperation = async (sectionId, subId, session) => {
   try {
     const result = await session.run(
       `
-      MATCH (user:USER) - [:OWNS] -> (section:SECTION) - [:CREATED] -> (publications:PUBLICATION)
+      MATCH (user:USER) - [:OWNS] -> (section:SECTION) - [:CREATES_PUBLICATION] -> (publications:PUBLICATION)
       WHERE user.subId = $subId AND ID(section) = $sectionId
       RETURN publications
       ORDER BY publications.createdAt DESC
@@ -81,7 +81,7 @@ const createPublicationOperation = async (input, subId, session) => {
       `
       MATCH (section:SECTION)
       WHERE ID(section) = $sectionId
-      CREATE (section) - [:CREATED] -> (publication:PUBLICATION {
+      CREATE (section) - [:CREATES_PUBLICATION] -> (publication:PUBLICATION {
         title: $publicationTitle,
         ${input.subtitle ? "subtitle: $publicationSubtitle," : ""}
         ${input.tags ? "tags: $publicationTags," : ""}
@@ -179,7 +179,7 @@ const deletePublicationOperation = async (input, subId, session) => {
       `
       MATCH (user:USER {subId: $subId}) - [:OWNS] -> (section:SECTION)
       WHERE ID(section) = $sectionId
-      MATCH (section) - [:CREATED] -> (publication:PUBLICATION)
+      MATCH (section) - [:CREATES_PUBLICATION] -> (publication:PUBLICATION)
       WHERE ID(publication) = $publicationId
       DETACH DELETE publication
       `,
