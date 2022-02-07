@@ -252,6 +252,12 @@ export class MvnifestShooterCloneStack extends Stack {
       responseMappingTemplate: MappingTemplate.lambdaResult(),
     });
     shooterPublicationFunctionDS.createResolver({
+      typeName: "Query",
+      fieldName: "searchPublications",
+      requestMappingTemplate: MappingTemplate.lambdaRequest(),
+      responseMappingTemplate: MappingTemplate.lambdaResult(),
+    });
+    shooterPublicationFunctionDS.createResolver({
       typeName: "Mutation",
       fieldName: "createPublication",
       requestMappingTemplate: MappingTemplate.lambdaRequest(),
@@ -299,6 +305,12 @@ export class MvnifestShooterCloneStack extends Stack {
     shooterEventFunctionDS.createResolver({
       typeName: "Query",
       fieldName: "listEvents",
+      requestMappingTemplate: MappingTemplate.lambdaRequest(),
+      responseMappingTemplate: MappingTemplate.lambdaResult(),
+    });
+    shooterEventFunctionDS.createResolver({
+      typeName: "Query",
+      fieldName: "searchEvents",
       requestMappingTemplate: MappingTemplate.lambdaRequest(),
       responseMappingTemplate: MappingTemplate.lambdaResult(),
     });

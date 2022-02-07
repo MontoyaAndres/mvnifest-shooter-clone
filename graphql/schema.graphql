@@ -51,8 +51,10 @@ type Query {
   listSections: [Section!]!
   getPublication(id: ID!, sectionId: ID!): Publication
   listPublications(sectionId: ID!): [Publication!]!
+  searchPublications(sectionId: ID!, value: String!): [Publication!]!
   getEvent(id: ID!, sectionId: ID!): Event
   listEvents(sectionId: ID!): [Event!]!
+  searchEvents(sectionId: ID!, value: String!): [Event!]!
 }
 
 type Mutation {

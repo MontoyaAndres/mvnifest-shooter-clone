@@ -3,6 +3,7 @@ const ssm = require("@middy/ssm");
 const {
   getEventOperation,
   listEventsOperation,
+  searchEventsOperation,
   createEventOperation,
   updateEventOperation,
   deleteEventOperation,
@@ -47,6 +48,27 @@ exports.handler = middy(async (event, context) => {
 
         try {
           const events = await listEventsOperation(sectionId, sub, session);
+
+          return events;
+        } catch (error) {
+          throw new Error(error);
+        }
+      },
+      searchEvents: async (ctx, session) => {
+        const {
+          arguments: { sectionId, value },
+          identity: {
+            claims: { sub },
+          },
+        } = ctx;
+
+        try {
+          const events = await searchEventsOperation(
+            sectionId,
+            value,
+            sub,
+            session
+          );
 
           return events;
         } catch (error) {

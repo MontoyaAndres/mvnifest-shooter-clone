@@ -3,6 +3,7 @@ const ssm = require("@middy/ssm");
 const {
   getPublicationOperation,
   listPublicationsOperation,
+  searchPublicationsOperation,
   createPublicationOperation,
   updatePublicationOperation,
   deletePublicationOperation,
@@ -53,6 +54,27 @@ exports.handler = middy(async (event, context) => {
         try {
           const publications = await listPublicationsOperation(
             sectionId,
+            sub,
+            session
+          );
+
+          return publications;
+        } catch (error) {
+          throw new Error(error);
+        }
+      },
+      searchPublications: async (ctx, session) => {
+        const {
+          arguments: { sectionId, value },
+          identity: {
+            claims: { sub },
+          },
+        } = ctx;
+
+        try {
+          const publications = await searchPublicationsOperation(
+            sectionId,
+            value,
             sub,
             session
           );

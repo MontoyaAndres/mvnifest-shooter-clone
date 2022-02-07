@@ -60,6 +60,45 @@ const listPublicationsOperation = async (sectionId, subId, session) => {
   }
 };
 
+const searchPublicationsOperation = async (
+  sectionId,
+  value,
+  subId,
+  session
+) => {
+  try {
+    const result = await session.run(
+      `
+      MATCH (user:USER) - [:OWNS] -> (section:SECTION)
+      WHERE user.subId = $subId AND ID(section) = $sectionId
+      CALL db.index.fulltext.queryNodes("publications_Title_SubTitle_Tags", $searchValue)
+      YIELD node
+      RETURN node
+      `,
+      {
+        subId,
+        sectionId: parseInt(sectionId, 10),
+        searchValue: value,
+      }
+    );
+
+    const records =
+      result.records.map((record) => {
+        let currentRecord = record.get(0);
+
+        return {
+          ...currentRecord.properties,
+          id: currentRecord.identity.low,
+          metadata: JSON.parse(currentRecord.properties.metadata),
+        };
+      }) || [];
+
+    return records;
+  } catch (error) {
+    throw new Error(error);
+  }
+};
+
 const createPublicationOperation = async (input, subId, session) => {
   try {
     const getSection = await session.run(
@@ -199,6 +238,7 @@ const deletePublicationOperation = async (input, subId, session) => {
 module.exports = {
   getPublicationOperation,
   listPublicationsOperation,
+  searchPublicationsOperation,
   createPublicationOperation,
   updatePublicationOperation,
   deletePublicationOperation,

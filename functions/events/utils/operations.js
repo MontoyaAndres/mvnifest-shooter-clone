@@ -58,6 +58,39 @@ const listEventsOperation = async (sectionId, subId, session) => {
   }
 };
 
+const searchEventsOperation = async (sectionId, value, subId, session) => {
+  try {
+    const result = await session.run(
+      `
+      MATCH (user:USER) - [:OWNS] -> (section:SECTION)
+      WHERE user.subId = $subId AND ID(section) = $sectionId
+      CALL db.index.fulltext.queryNodes("events_Name_Location", $searchValue)
+      YIELD node
+      RETURN node
+      `,
+      {
+        subId,
+        sectionId: parseInt(sectionId, 10),
+        searchValue: value,
+      }
+    );
+
+    const records =
+      result.records.map((record) => {
+        let currentRecord = record.get(0);
+
+        return {
+          ...currentRecord.properties,
+          id: currentRecord.identity.low,
+        };
+      }) || [];
+
+    return records;
+  } catch (error) {
+    throw new Error(error);
+  }
+};
+
 const createEventOperation = async (input, subId, session) => {
   try {
     const getSection = await session.run(
@@ -193,6 +226,7 @@ const deleteEventOperation = async (input, subId, session) => {
 module.exports = {
   getEventOperation,
   listEventsOperation,
+  searchEventsOperation,
   createEventOperation,
   updateEventOperation,
   deleteEventOperation,
