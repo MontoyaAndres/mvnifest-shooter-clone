@@ -115,12 +115,15 @@ const deleteSectionOperation = async (input, subId, session) => {
 
     const result = await session.run(
       `
-      MATCH (section:SECTION)
-      WHERE ID(section) = $sectionId
-      DETACH DELETE section
+      MATCH (user:USER) - [:OWNS] -> (section:SECTION)
+      WHERE user.subId = $subId AND ID(section) = $sectionId
+      SET section.deletedAt = $deletedAt
+      RETURN section
       `,
       {
+        subId,
         sectionId: parseInt(input.id, 10),
+        deletedAt: currentDate,
       }
     );
 

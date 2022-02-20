@@ -8,8 +8,9 @@
     "build": "tsc",
     "watch": "tsc -w",
     "test": "jest",
-    "synth": "NODE_ENV=develop cdk synth",
-    "deploy-develop": "NODE_ENV=develop cdk deploy --profile andres"
+    "synth-develop": "NODE_ENV=develop cdk synth",
+    "deploy-develop": "NODE_ENV=develop cdk deploy --profile andres",
+    "diff-develop": "NODE_ENV=develop cdk diff --all --profile andres"
   },
   "devDependencies": {
     "@types/jest": "^26.0.10",

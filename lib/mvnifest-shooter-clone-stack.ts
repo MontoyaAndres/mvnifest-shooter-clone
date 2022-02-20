@@ -1,5 +1,5 @@
 import * as path from "path";
-import { CfnOutput, Fn, Stack, StackProps } from "aws-cdk-lib";
+import { CfnOutput, Duration, Fn, Stack, StackProps } from "aws-cdk-lib";
 import {
   AccountRecovery,
   UserPool,
@@ -115,6 +115,7 @@ export class MvnifestShooterCloneStack extends Stack {
           path.join(__dirname, "../functions/postConfirmation")
         ),
         handler: "index.handler",
+        timeout: Duration.seconds(60),
         environment: {
           NODE_ENV,
         },
@@ -137,6 +138,7 @@ export class MvnifestShooterCloneStack extends Stack {
         runtime: Runtime.NODEJS_14_X,
         code: Code.fromAsset(path.join(__dirname, "../functions/users")),
         handler: "index.handler",
+        timeout: Duration.seconds(60),
         environment: {
           NODE_ENV,
         },
@@ -164,6 +166,7 @@ export class MvnifestShooterCloneStack extends Stack {
         runtime: Runtime.NODEJS_14_X,
         code: Code.fromAsset(path.join(__dirname, "../functions/sections")),
         handler: "index.handler",
+        timeout: Duration.seconds(60),
         environment: {
           NODE_ENV,
         },
@@ -227,6 +230,7 @@ export class MvnifestShooterCloneStack extends Stack {
         runtime: Runtime.NODEJS_14_X,
         code: Code.fromAsset(path.join(__dirname, "../functions/publications")),
         handler: "index.handler",
+        timeout: Duration.seconds(60),
         environment: {
           NODE_ENV,
         },
@@ -284,6 +288,7 @@ export class MvnifestShooterCloneStack extends Stack {
         runtime: Runtime.NODEJS_14_X,
         code: Code.fromAsset(path.join(__dirname, "../functions/events")),
         handler: "index.handler",
+        timeout: Duration.seconds(60),
         environment: {
           NODE_ENV,
         },

@@ -155,54 +155,61 @@ const createPublicationOperation = async (input, subId, session) => {
 
 const updatePublicationOperation = async (input, subId, session) => {
   try {
-    const getSection = await session.run(
+    const currentPublication = await session.run(
       `
       MATCH (user:USER) - [:OWNS] -> (section:SECTION)
-      WHERE user.subId = $subId AND ID(section) = $sectionId
-      RETURN section
+      MATCH (section) - [:CREATES_PUBLICATION] -> (publication:PUBLICATION)
+        WHERE user.subId = $subId AND ID(section) = $sectionId AND ID(publication) = $publicationId
+      RETURN publication
       `,
-      { subId, sectionId: parseInt(input.sectionId, 10) }
+      {
+        subId,
+        sectionId: parseInt(input.sectionId, 10),
+        publicationId: parseInt(input.id, 10),
+      }
     );
 
-    const sectionRecords = getSection.records;
+    const publicationRecords = currentPublication.records;
 
-    if (sectionRecords.length === 0) {
-      throw new Error("Section not found.");
+    if (publicationRecords.length === 0) {
+      throw new Error("Publication not found.");
     }
+
+    const publication = publicationRecords[0].get(0).properties;
 
     const updatePublication = await session.run(
       `
-      MATCH (publication:PUBLICATION)
-      WHERE ID(publication) = $publicationId
-      SET
-        ${input.title ? "publication.title = $publicationTitle," : ""}
-        ${input.subtitle ? "publication.subtitle = $publicationSubtitle," : ""}
-        ${input.tags ? "publication.tags = $publicationTags," : ""}
-        ${
-          input.description
-            ? "publication.description = $publicationDescription,"
-            : ""
-        }
-        ${input.image ? "publication.image = $publicationImage," : ""}
-        ${input.metadata ? "publication.metadata = $publicationMetadata," : ""}
-        ${
-          input.isCompleted
-            ? "publication.isCompleted = $publicationIsCompleted,"
-            : ""
-        }
-        publication.updatedAt = $publicationUpdatedAt
-      RETURN publication
-    `,
+      MATCH (user:USER) - [:OWNS] -> (section:SECTION)
+      MATCH (section) - [oldR:CREATES_PUBLICATION] -> (prevPublication:PUBLICATION)
+        WHERE user.subId = $subId AND ID(section) = $sectionId AND ID(prevPublication) = $publicationId
+      DELETE oldR
+      CREATE (newPublication:PUBLICATION {
+        title: $publicationTitle,
+        subtitle: $publicationSubtitle,
+        tags: $publicationTags,
+        description: $publicationDescription,
+        image: $publicationImage,
+        metadata: $publicationMetadata,
+        isCompleted: $publicationIsCompleted,
+        createdAt: $publicationCreatedAt,
+        updatedAt: datetime()
+      })
+      MERGE (section) - [:CREATES_PUBLICATION] -> (newPublication)
+      MERGE (newPublication) - [:PREV_PUBLICATION] -> (prevPublication)
+        ON CREATE SET prevPublication.updatedAt = datetime()
+      `,
       {
+        subId,
+        sectionId: parseInt(input.sectionId, 10),
         publicationId: parseInt(input.id, 10),
-        publicationTitle: input.title,
-        publicationSubtitle: input.subtitle,
-        publicationTags: input.tags,
-        publicationDescription: input.description,
-        publicationImage: input.image,
-        publicationMetadata: input.metadata,
-        publicationIsCompleted: input.isCompleted,
-        publicationUpdatedAt: currentDate,
+        publicationTitle: input.title || publication.title,
+        publicationSubtitle: input.subtitle || publication.subtitle,
+        publicationTags: input.tags || publication.tags,
+        publicationDescription: input.description || publication.description,
+        publicationImage: input.image || publication.image,
+        publicationMetadata: input.metadata || publication.metadata,
+        publicationIsCompleted: input.isCompleted || publication.isCompleted,
+        publicationCreatedAt: publication.createdAt,
       }
     );
 
@@ -216,16 +223,16 @@ const deletePublicationOperation = async (input, subId, session) => {
   try {
     const result = await session.run(
       `
-      MATCH (user:USER {subId: $subId}) - [:OWNS] -> (section:SECTION)
-      WHERE ID(section) = $sectionId
-      MATCH (section) - [:CREATES_PUBLICATION] -> (publication:PUBLICATION)
-      WHERE ID(publication) = $publicationId
-      DETACH DELETE publication
+      MATCH (user:USER) - [:OWNS] -> (section:SECTION) - [:CREATES_PUBLICATION] -> (publication:PUBLICATION)
+      WHERE user.subId = $subId AND ID(section) = $sectionId AND ID(publication) = $publicationId
+      SET publication.deletedAt = $publicationDeletedAt
+      RETURN publication
       `,
       {
         subId,
         sectionId: parseInt(input.sectionId, 10),
         publicationId: parseInt(input.id, 10),
+        publicationDeletedAt: currentDate,
       }
     );
 
